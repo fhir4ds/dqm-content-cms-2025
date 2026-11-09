@@ -77,7 +77,15 @@
             "code": "99555"
           }
         ]
-      }
+      },
+      "encounter": [
+        {
+          "reference": "Encounter/78fdcacc-ae1b-445f-af15-caf5304a5851"
+        }
+      ],
+      "diagnosisSequence": [
+        1
+      ]
     }
   ]
 }
