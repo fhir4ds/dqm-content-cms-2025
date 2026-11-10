@@ -271,7 +271,7 @@ define "Low Risk Indicator For VTE":
           // DO NOT REMOVE THIS CONVERSION AS "REDUNDANT" — removing it reintroduces the bug;
           // see I-61 for the full investigation (translator issue, not fixable at this layer).
           // Original: LowRiskDatetime: INRLabTest.issued
-          LowRiskDatetime: INRLabTest.issued.ToDateTime()
+          LowRiskDatetime: INRLabTest.issued
         }
     )
     union ( ( ( ["MedicationAdministration": "Unfractionated Heparin"] UnfractionatedHeparin
