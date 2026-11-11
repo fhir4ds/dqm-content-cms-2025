@@ -140,7 +140,10 @@ define "Urinary Retention Diagnosis Starts Within 1 Year After Initial BPH Diagn
   ( [FHIR.Condition: "Urinary Retention"] ) UrinaryRetention
     with "Initial BPH Diagnosis Starts Within 6 Months Before the Measurement Period" InitialBPHDiagnosis
       such that UrinaryRetention.prevalenceInterval ( ) starts 1 year or less on or after day of start of InitialBPHDiagnosis.prevalenceInterval ( )
-    where UrinaryRetention.verificationStatusIsNotInvalid ( )
+    // Same as above: an inactive/resolved urinary-retention condition must not
+    // exclude the encounter (CMS771 3ab3ac1d over-fired Denominator Exclusion).
+    where UrinaryRetention.clinicalStatus ~ FHIRCommon."active"
+      and UrinaryRetention.verificationStatusIsNotInvalid ( )
 
 define "Urinary Symptom Score 6 to 12 Months After Initial BPH Diagnosis":
   Last("Urinary Symptom Score Assessment" USSAssessment
@@ -169,6 +172,11 @@ define "Initial BPH Diagnosis Starts Within 6 Months Before the Measurement Peri
   //       union [ConditionEncounterDiagnosis: "Benign prostatic hyperplasia with lower urinary tract symptoms"]) NewBPHDiagnosis
   First(([FHIR.Condition: "Benign prostatic hyperplasia with lower urinary tract symptoms"]) NewBPHDiagnosis
       where NewBPHDiagnosis.prevalenceInterval ( ) starts during Interval[start of "Measurement Period" - 6 months, start of "Measurement Period"]
+        // QI-Core used isConfirmedActiveDiagnosis(); the [I-28] workaround kept
+        // only verificationStatusIsNotInvalid(), which also accepted INACTIVE /
+        // RESOLVED conditions and over-included them in the Initial Population
+        // (CMS771 4d7a04b3). Re-attach the active requirement.
+        and NewBPHDiagnosis.clinicalStatus ~ FHIRCommon."active"
         and NewBPHDiagnosis.verificationStatusIsNotInvalid ( )
       sort by start of onset.toInterval ( )
   )
