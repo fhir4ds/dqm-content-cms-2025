@@ -72,16 +72,37 @@ define "Numerator":
     )
 
 define "Denominator Exceptions":
-  false
-/*
-TODO: Need to reassess how we are representing given no ObservationCancelled profile
   ( exists "Medical or Patient Reason for Not Screening Adolescent for Depression"
       and not "Has Adolescent Depression Screening"
   )
     or ( exists "Medical or Patient Reason for Not Screening Adult for Depression"
         and not "Has Adult Depression Screening"
     )
+
+/*
+@description: Returns cancelled adolescent depression screenings whose not-done
+reason is a patient decline or a medical reason. US Quality Core exposes the
+QI-Core `notDoneReason` property as the fluent function
+`USQualityCoreCommon.notDoneReason()` backed by the
+`us-quality-core-notDoneReason` extension; the previous `false` placeholder
+(added because QI-Core had no ObservationCancelled profile) made every
+patient-declined case evaluate as not-excepted (CMS2 28/36).
 */
+define "Medical or Patient Reason for Not Screening Adolescent for Depression":
+  [USQualityCore.ObservationCancelled: "Adolescent depression screening assessment"] NoAdolescentScreen
+    with "Qualifying Encounter During Measurement Period" QualifyingEncounter
+      such that NoAdolescentScreen.issued during day of QualifyingEncounter.period
+    where ( NoAdolescentScreen.notDoneReason ( ) ~ "Depression screening declined (situation)"
+        or NoAdolescentScreen.notDoneReason ( ) in "Medical Reason"
+    )
+
+define "Medical or Patient Reason for Not Screening Adult for Depression":
+  [USQualityCore.ObservationCancelled: "Adult depression screening assessment"] NoAdultScreen
+    with "Qualifying Encounter During Measurement Period" QualifyingEncounter
+      such that NoAdultScreen.issued during day of QualifyingEncounter.period
+    where ( NoAdultScreen.notDoneReason ( ) ~ "Depression screening declined (situation)"
+        or NoAdultScreen.notDoneReason ( ) in "Medical Reason"
+    )
 
 define "Follow Up Intervention for Positive Adolescent Depression Screening":
   ( ( [USQualityCore.MedicationRequest: "Adolescent Depression Medications"] AdolescentMed
