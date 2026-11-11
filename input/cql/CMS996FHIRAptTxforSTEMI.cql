@@ -274,7 +274,12 @@ define "ED Encounter with a Documented Reason for No PCI Performed":
       such that ( PCINotDone.statusReason in "Patient Refusal"
           or PCINotDone.statusReason in "Procedure Not Indicated/Contraindicated"
       )
-        and PCINotDone.performed during EDwSTEMI.period
+        // [I-56] A ProcedureNotDone carries its timing in the us-quality-core-recorded
+        // extension; `performed` is data-absent-reason: not-performed on that
+        // profile (same defect class as [I-18/I-55] in CMS108/CMS190), so
+        // `performed during` can never be true. The QI-Core twin of this
+        // measure (ecqm-content-qicore-2025 CMS996) uses `recorded during`.
+        and PCINotDone.recorded ( ) during EDwSTEMI.period
 
 define "ED Encounter with a Documented Reason for Not Administering Fibrinolytic Therapy":
   "ED Encounter with STEMI Diagnosis" EDwSTEMI
@@ -282,7 +287,10 @@ define "ED Encounter with a Documented Reason for Not Administering Fibrinolytic
       such that ( FibrinolyticNoMed.statusReason in "Patient Refusal"
           or FibrinolyticNoMed.statusReason in "Drug Intervention Not Indicated/Contraindicated"
       )
-        and FibrinolyticNoMed.effective during EDwSTEMI.period
+        // [I-56] MedicationAdministrationNotDone carries its timing in the
+        // us-quality-core-recorded extension; `effective` is data-absent on that
+        // profile, so `effective during` can never be true.
+        and FibrinolyticNoMed.recorded ( ) during EDwSTEMI.period
 
 define "Fibrinolytic Therapy Administration within 30 Minutes of Arrival":
   "ED Encounter with STEMI Diagnosis" EDwithSTEMI
