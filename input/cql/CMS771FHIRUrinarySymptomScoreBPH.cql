@@ -69,8 +69,17 @@ define "SDE Sex":
 define "Has Qualifying BPH Diagnosis":
   "Initial BPH Diagnosis Starts Within 6 Months Before the Measurement Period" is not null
 
+/*
+@description: Male patient (QI-Core original form). The conversion rewrote this
+as `SDE."SDE Sex" ~ SDE."Male (finding)"`, but a `~` between a runtime
+Code-valued define and a named code literal lowers to
+`fhirpath_bool(<SDE Sex value>, 'SDE Sex.coding.where(...)')` — a bogus path
+(the value is a Code, not a resource) that is always FALSE, so 22 of 31
+patients failed Initial Population. The fixtures carry only the base
+`Patient.gender` element, which is exactly what the QI-Core measure compares.
+*/
 define "Patient is Male":
-  SDE."SDE Sex" ~ SDE."Male (finding)"
+  Patient.gender = 'male'
 
 define "Urinary Symptom Score Assessment":
   "Documented IPSS Assessment Result"
