@@ -41,6 +41,25 @@ define "Non Elective Inpatient Encounter With Age":
 define "Ischemic Stroke Encounter":
   "Non Elective Inpatient Encounter With Age" NonElectiveEncounterWithAge
    where NonElectiveEncounterWithAge.hasPrincipalDiagnosisOf("Ischemic Stroke" )
+     // hasPrincipalDiagnosisOf() resolves the principal diagnosis through the
+     // encounter's CLAIM (CQMCommon.claimDiagnosis → Claim.item.encounter +
+     // Claim.diagnosis). The CMS 2025 fixtures model the diagnosis with
+     // Encounter.reasonReference and only attach a Claim to SOME episodes
+     // (patient 5a329008: two inpatient stroke episodes, one claim), so the
+     // claim-only test silently dropped whole episodes (CMS72 denominator
+     // never reached its expected size). Fall back to the encounter's own
+     // diagnosis ONLY when the encounter has NO claim at all — an encounter
+     // that DOES have a claim must still be judged by that claim's principal
+     // diagnosis (871d38c3 has a claim whose only diagnosis is a non-principal
+     // sequence-2 stroke code and must NOT count).
+     or ( not exists ( [Claim] ClaimForEncounter
+             where ClaimForEncounter.status = 'active'
+               and ClaimForEncounter.use = 'claim'
+               and exists ( ClaimForEncounter.item ClaimItem
+                     where ClaimItem.encounter.references ( NonElectiveEncounterWithAge ) ) )
+          and exists ( NonElectiveEncounterWithAge.encounterDiagnosis ( ) EncounterStrokeDx
+                where EncounterStrokeDx.code in "Ischemic Stroke" )
+        )
 
 define "Ischemic Stroke Encounters With Discharge Disposition":
   "Ischemic Stroke Encounter" IschemicStrokeEncounter
