@@ -256,8 +256,10 @@ define "Low Risk Indicator For VTE":
           // of" comparison. Same mechanism as CMS108's "Low Risk Indicator For VTE".
           // DO NOT REMOVE THIS CONVERSION AS "REDUNDANT" — removing it reintroduces the bug;
           // see I-61 for the full investigation (translator issue, not fixable at this layer).
-          // Original: LowRiskDatetime: INRLabTest.issued
-          LowRiskDatetime: INRLabTest.issued
+          // Restored by FHIR4-61: the inliner now binds the method-form receiver for non-fluent
+          // callees (FHIR4-56), so this conversion lowers to the argument instead of the
+          // Observation CTE's own `value` column.
+          LowRiskDatetime: INRLabTest.issued.ToDateTime()
         }
     )
     union ( ( ( ["MedicationAdministration": "Unfractionated Heparin"] UnfractionatedHeparin
